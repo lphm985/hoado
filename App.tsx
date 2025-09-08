@@ -1,3 +1,5 @@
+import { supabase } from './supabase'
+
 import React, { useEffect, useState } from "react"
 import {
   loadGameData,
@@ -21,30 +23,37 @@ export default function App() {
   const [message, setMessage] = useState("")
   const [token, setToken] = useState<string | null>(null)
 
-  // 🚩 tạm hardcode token để test nhanh
-  // sau này bạn thay bằng Supabase Auth để lấy token thật
+  // Lấy token từ Supabase Auth
   useEffect(() => {
-    const testToken = localStorage.getItem("token") // giả sử đã login
-    if (testToken) setToken(testToken)
+    async function fetchToken() {
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token || null
+      setToken(accessToken)
+    }
+    fetchToken()
   }, [])
 
   // load game data
   useEffect(() => {
+    if (!token) return
+
     async function fetchGame() {
       try {
-        const res = await loadGameData()
+        const res = await loadGameData(token)
         setGame(res.data)
       } catch (err) {
         console.error("Load game failed", err)
       }
     }
+
     fetchGame()
-  }, [])
+  }, [token])
 
   // load player
   useEffect(() => {
+    if (!token) return
+
     async function fetchPlayer() {
-      if (!token) return
       try {
         const res = await loadPlayer(token)
         setPlayer(res.player)
@@ -52,21 +61,25 @@ export default function App() {
         console.error("Load player failed", err)
       }
     }
+
     fetchPlayer()
   }, [token])
 
   // load chat
   useEffect(() => {
+    if (!token) return
+
     async function fetchChat() {
       try {
-        const res = await loadChat()
+        const res = await loadChat(token)
         setChat(res.messages)
       } catch (err) {
         console.error("Load chat failed", err)
       }
     }
+
     fetchChat()
-  }, [])
+  }, [token])
 
   // save player (ví dụ khi nhấn nút)
   async function handleSave() {

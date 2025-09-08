@@ -1,10 +1,15 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+import { supabase } from './supabase'
 
-export async function loadGameData() {
-  const res = await fetch(`${API_URL}/game`)
+const API_URL = import.meta.env.VITE_API_URL || "https://hoado-backend.onrender.com"
+
+export async function loadGameData(token: string) {
+  const res = await fetch(`${API_URL}/game`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
   if (!res.ok) throw new Error("Failed to load game data")
   return res.json()
 }
+
 
 export async function loadPlayer(token: string) {
   const res = await fetch(`${API_URL}/player`, {
@@ -27,8 +32,10 @@ export async function savePlayer(token: string, data: any) {
   return res.json()
 }
 
-export async function loadChat() {
-  const res = await fetch(`${API_URL}/chat`)
+export async function loadChat(token: string) {
+  const res = await fetch(`${API_URL}/chat`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
   if (!res.ok) throw new Error("Failed to load chat")
   return res.json()
 }
